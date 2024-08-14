@@ -5,47 +5,47 @@
 //
 
 import Foundation
+import Combine
 
 enum NetworkError: Error {
-    case badeURL
+    case badURL
     case noData
+    case decodingError
+
 }
 
 class WebService {
     func getWeatherByCity(city: String, completion: @escaping ((Result<Weather, NetworkError>) -> Void)) {
         guard let weatherURL = Constants.Urls.weatherByCity(city: city) else {
-            return completion(.failure(.badeURL))
+            return completion(.failure(.badURL))
         }
         
         URLSession.shared.dataTask(with: weatherURL) { (data, _, error) in
-            
             guard let data = data, error == nil else {
                 return completion(.failure(.noData))
             }
             
-            let weatherResponse = try? JSONDecoder().decode(WeatherResponse.self, from: data)
-            if let weatherResponse = weatherResponse {
-                completion(.success(weatherResponse.weather))
+            do {
+                let weather = try JSONDecoder().decode(Weather.self, from: data)
+                completion(.success(weather))
+            } catch let decodingError as DecodingError {
+                print("Decoding error: \(decodingError)")
+                completion(.failure(.decodingError))
+            } catch {
+                completion(.failure(.decodingError))
             }
         }.resume()
     }
     
-    func fetchHourlyWeather(lat: Double, lon: Double, completion: @escaping ((Result<[HourlyWeather], NetworkError>) -> Void)) {
-        guard let url = Constants.Urls.hourlyWeather(lat: lat, lon: lon) else {
-            return completion(.failure(.badeURL))
+    func fetchForecast(lat: Double, lon: Double) -> AnyPublisher<ForecastResponse, NetworkError> {
+        guard let url = Constants.Urls.forecastByCoordinates(lat: lat, lon: lon) else {
+            return Fail(error: NetworkError.badURL).eraseToAnyPublisher()
         }
         
-        URLSession.shared.dataTask(with: url) { (data, _, error) in
-            guard let data = data, error == nil else {
-                return completion(.failure(.noData))
-            }
-            
-            let hourlyWeatherResponse = try? JSONDecoder().decode(HourlyWeatherResponse.self, from: data)
-            if let hourlyWeatherResponse {
-                completion(.success(hourlyWeatherResponse.list))
-            } else {
-                completion(.failure(.noData))
-            }
-        }.resume()
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data)
+            .decode(type: ForecastResponse.self, decoder: JSONDecoder())
+            .mapError { _ in NetworkError.decodingError }
+            .eraseToAnyPublisher()
     }
 }

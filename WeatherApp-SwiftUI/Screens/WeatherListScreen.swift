@@ -23,14 +23,13 @@ struct WeatherListScreen: View {
     
     var body: some View {
         
-        List {
-            ForEach(store.weatherList, id: \.id) { weather in
-                NavigationLink(destination: WeatherDetailScreen(weather: weather)) {
-                    WeatherCell(weather: weather)
+            List {
+                ForEach(store.weatherList, id: \.id) { weather in
+                    NavigationLink(destination: WeatherDetailScreen( viewModel: WeatherDetailViewModel() , weather: weather)) {
+                        WeatherCell(weather: weather)
+                    }
                 }
             }
-            
-        }
         .listStyle(PlainListStyle())
         
         .sheet(item: $activeSheet, content: { (item) in
@@ -62,6 +61,7 @@ struct WeatherListScreen: View {
 
 struct WeatherCell: View {
     @EnvironmentObject var store: Store
+    
     let weather: WeatherViewModel
     var body: some View {
         HStack {
