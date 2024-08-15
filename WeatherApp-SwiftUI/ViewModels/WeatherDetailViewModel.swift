@@ -13,8 +13,9 @@ class WeatherDetailViewModel: ObservableObject {
     @Published var forecastList: [ForecastWeather] = []
     @Published var isLoading: Bool = false
     @Published var error: String?
+    @Published var weather: WeatherViewModel?
 
-    private let weatherService = WebService() // This should be your service for network calls
+    private let weatherService = WebService()
     private var cancellables = Set<AnyCancellable>()
     
     func fetchForecast(lat: Double, lon: Double) {

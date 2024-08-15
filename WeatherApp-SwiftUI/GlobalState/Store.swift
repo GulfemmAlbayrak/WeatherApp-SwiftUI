@@ -12,7 +12,7 @@ class Store: ObservableObject {
     @Published var selectedUnit: TemperatureUnit = .kelvin
     @Published var weatherList: [WeatherViewModel] = [WeatherViewModel]()
     
-    private let webService = WebService() // Create an instance of WebService
+    private let webService = WebService() 
     
     init() {
         selectedUnit = UserDefaults.standard.unit
@@ -21,10 +21,8 @@ class Store: ObservableObject {
     
     func addWeather(_ weather: WeatherViewModel) {
         if let index = weatherList.firstIndex(where: { $0.city == weather.city }) {
-            // Eğer şehir listede varsa, kaldır
             weatherList.remove(at: index)
         }
-        // Şehir verisini başa ekle
         weatherList.insert(weather, at: 0)
         saveCities()
     }

@@ -11,23 +11,23 @@ import Foundation
 
 // MARK: - ForecastResponse
 struct ForecastResponse: Codable {
-    let list: [ForecastWeather] // List of weather forecasts
-    let city: City // Information about the city
+    let list: [ForecastWeather]
+    let city: City
 }
 
 // MARK: - ForecastWeather
 struct ForecastWeather: Codable {
-    let dt: Int // Forecast time (timestamp)
-    let main: Main // Main weather details
-    let weather: [WeatherElement] // Weather condition details
-    let clouds: Clouds // Cloudiness
-    let wind: Wind // Wind details
-    let visibility: Int // Visibility
-    let pop: Double // Probability of precipitation
-    let rain: Rain? // Rain information (optional)
-    let sys: ForecastSys // Sys details (e.g., pod)
-    let dtTxt: String // Forecast time as text
-
+    let dt: Int
+    let main: Main
+    let weather: [WeatherElement]
+    let clouds: Clouds
+    let wind: Wind 
+    let visibility: Int
+    let pop: Double
+    let rain: Rain?
+    let sys: ForecastSys
+    let dtTxt: String
+    
     enum CodingKeys: String, CodingKey {
         case dt, main, weather, clouds, wind, visibility, pop, rain, sys
         case dtTxt = "dt_txt"
@@ -55,5 +55,5 @@ struct Rain: Codable {
 
 // MARK: - ForecastSys
 struct ForecastSys: Codable {
-    let pod: String // Part of the day (e.g., "n" for night, "d" for day)
+    let pod: String
 }
