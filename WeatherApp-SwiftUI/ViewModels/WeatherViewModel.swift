@@ -8,6 +8,8 @@
 import Foundation
 
 struct WeatherViewModel {
+    private let webService = WebService()
+    
     let weather: Weather
     let id = UUID()
     

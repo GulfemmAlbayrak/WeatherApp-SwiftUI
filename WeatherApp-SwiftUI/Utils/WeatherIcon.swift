@@ -43,3 +43,18 @@ enum WeatherIcon: String {
     }
 }
 
+func weatherIconColor(for iconCode: String) -> Color {
+    switch iconCode {
+    case "01d", "01n": return .yellow
+    case "02d", "02n": return .blue
+    case "03d", "03n": return .gray
+    case "04d", "04n": return .gray
+    case "09d", "09n": return .teal
+    case "10d", "10n": return .blue
+    case "11d", "11n": return .purple
+    case "13d", "13n": return .white
+    case "50d", "50n": return .gray
+    default: return .primary
+    }
+}
+

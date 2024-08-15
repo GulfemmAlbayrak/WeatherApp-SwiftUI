@@ -13,74 +13,101 @@ struct WeatherDetailScreen: View {
                 // Header with city name and date
                 VStack(alignment: .leading, spacing: 10) {
                     Text(weather.name)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)  // Use primary color
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.primary)
                         
                     Text("Date: \(Date(timeIntervalSince1970: TimeInterval(weather.dt)).formattedDate())")
                         .font(.subheadline)
                         .foregroundColor(.secondary)  // Use secondary color
                 }
                 .padding(.top)
-                
-                // Weather information
-                VStack(alignment: .leading, spacing: 15) {
-                    weatherInfoRow(
-                        systemName: "thermometer",
-                        text: "Temperature: \(String(format: "%.1f", viewModel.getTemperatureByUnit(tempInKelvin: weather.main.temp, unit: store.selectedUnit))) \(store.selectedUnit.displayText.prefix(1))",
-                        color: .blue
+                ZStack {
+                    Color.white.edgesIgnoringSafeArea(.all)
+                        // Weather information
+                        VStack {
+                            weatherInfoRow(
+                                systemName: "thermometer",
+                                text: "Temperature: \(String(format: "%.1f", viewModel.getTemperatureByUnit(tempInKelvin: weather.main.temp, unit: store.selectedUnit))) \(store.selectedUnit.displayText.prefix(1))",
+                                color: .blue
+                            )
+                            
+                            weatherInfoRow(
+                                systemName: "humidity",
+                                text: "Humidity: \(weather.main.humidity)%",
+                                color: .purple
+                            )
+                            
+                            weatherInfoRow(
+                                systemName: "wind",
+                                text: "Wind Speed: \(String(format: "%.1f", weather.wind.speed)) m/s",
+                                color: .green
+                            )
+                            
+                            weatherInfoRow(
+                                systemName: "sunrise",
+                                text: "Sunrise: \(Date(timeIntervalSince1970: TimeInterval(weather.sys.sunrise)).formattedTime())",
+                                color: .orange
+                            )
+                            
+                            weatherInfoRow(
+                                systemName: "sunset",
+                                text: "Sunset: \(Date(timeIntervalSince1970: TimeInterval(weather.sys.sunset)).formattedTime())",
+                                color: .red
+                            )
+                        }
+//                        .padding(20)
+//                        .background(
+//                        RoundedRectangle(cornerRadius: 15)
+//                            .fill(Color(red: 0.902, green: 0.902, blue: 0.980))
+//                            .shadow(radius: 5)
+//                        )
+//                        .padding(6)
+//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                        .background(Color.clear)
+                    .padding(20)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color(red: 0.902, green: 0.902, blue: 0.980))
+                        .shadow(radius: 5)
                     )
-                    
-                    weatherInfoRow(
-                        systemName: "humidity",
-                        text: "Humidity: \(weather.main.humidity)%",
-                        color: .purple
-                    )
-                    
-                    weatherInfoRow(
-                        systemName: "wind",
-                        text: "Wind Speed: \(String(format: "%.1f", weather.wind.speed)) m/s",
-                        color: .green
-                    )
-                    
-                    weatherInfoRow(
-                        systemName: "sunrise",
-                        text: "Sunrise: \(Date(timeIntervalSince1970: TimeInterval(weather.sys.sunrise)).formattedTime())",
-                        color: .orange
-                    )
-                    
-                    weatherInfoRow(
-                        systemName: "sunset",
-                        text: "Sunset: \(Date(timeIntervalSince1970: TimeInterval(weather.sys.sunset)).formattedTime())",
-                        color: .red
-                    )
+                    .padding(6)
                 }
-                
                 // Forecast data
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Forecast")
                         .font(.headline)
-                        .padding(.bottom, 10)
-                        .foregroundColor(.primary)  // Use primary color
+                        .padding(.bottom, 2)
+                        .foregroundColor(.primary)
                     
-                    ForEach(viewModel.forecastList, id: \.dt) { forecast in
-                        HStack {
-                            Text(Date(timeIntervalSince1970: TimeInterval(forecast.dt)).formattedDate())
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)  // Use secondary color
-                            Spacer()
-                            Text("\(String(format: "%.1f", viewModel.getTemperatureByUnit(tempInKelvin: forecast.main.temp, unit: store.selectedUnit))) \(store.selectedUnit.displayText.prefix(1))")
-                                .font(.subheadline)
-                                .foregroundColor(.primary)  // Use primary color
-                            Spacer()
-                            Image(systemName: Constants.Icons.weatherIcon(for: forecast.weather.first?.icon ?? "01d"))
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(weatherIconColor(for: forecast.weather.first?.icon ?? "01d"))  // Color based on weather icon
+                    ForEach(viewModel.groupForecastsByDay().keys.sorted(), id: \.self) { date in
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(date)
+                                .font(.headline)
+                                .padding(.bottom, 2)
+                                .foregroundColor(.primary)
+                            
+                            ForEach(viewModel.groupForecastsByDay()[date] ?? [], id: \.dt) { forecast in
+                                HStack {
+                                    Text(Date(timeIntervalSince1970: TimeInterval(forecast.dt)).formattedTime())
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Text("\(String(format: "%.1f", viewModel.getTemperatureByUnit(tempInKelvin: forecast.main.temp, unit: store.selectedUnit))) \(store.selectedUnit.displayText.prefix(1))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Image(systemName: Constants.Icons.weatherIcon(for: forecast.weather.first?.icon ?? "01d"))
+                                        .resizable()
+                                        .frame(width: 50, height: 50)
+                                        .foregroundColor(weatherIconColor(for: forecast.weather.first?.icon ?? "01d"))
+                                }
+                                .padding(.vertical, 5)
+                                .background(Color(UIColor.systemGray6))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
                         }
-                        .padding(.vertical, 5)
-                        .background(Color(UIColor.systemGray6))  // Light gray background for rows
-                        .clipShape(RoundedRectangle(cornerRadius: 8))  // Rounded corners for rows
+                        .padding(.bottom, 20)
                     }
                 }
                 
@@ -107,37 +134,8 @@ struct WeatherDetailScreen: View {
                 .foregroundColor(color)  // Set text color
         }
     }
-    
-    // Determine icon color based on weather condition
-    private func weatherIconColor(for iconCode: String) -> Color {
-        switch iconCode {
-        case "01d", "01n": return .yellow
-        case "02d", "02n": return .blue
-        case "03d", "03n": return .gray
-        case "04d", "04n": return .gray
-        case "09d", "09n": return .teal
-        case "10d", "10n": return .blue
-        case "11d", "11n": return .purple
-        case "13d", "13n": return .white
-        case "50d", "50n": return .gray
-        default: return .primary
-        }
-    }
+}
+#Preview {
+    WeatherListScreen().environmentObject(Store())
 }
 
-// Helper Extensions
-extension Date {
-    func formattedDate() -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: self)
-    }
-    
-    func formattedTime() -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        return formatter.string(from: self)
-    }
-}

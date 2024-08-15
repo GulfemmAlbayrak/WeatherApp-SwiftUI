@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import Combine
 
 class WeatherDetailViewModel: ObservableObject {
@@ -44,5 +45,38 @@ class WeatherDetailViewModel: ObservableObject {
             return tempInKelvin
         }
     }
+    
+    func weatherInfoRow(systemName: String, text: String, color: Color) -> some View {
+        HStack {
+            Image(systemName: systemName)
+                .resizable()
+                .frame(width: 24, height: 24)
+                .foregroundColor(color)
+            Text(text)
+                .font(.headline)
+                .foregroundColor(color)
+        }
+    }
+    
+    func groupForecastsByDay() -> [String: [ForecastWeather]] {
+        var groupedForecasts: [String: [ForecastWeather]] = [:]
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        for forecast in forecastList {
+            let date = Date(timeIntervalSince1970: TimeInterval(forecast.dt))
+            let dateString = dateFormatter.string(from: date)
+            
+            if groupedForecasts[dateString] != nil {
+                groupedForecasts[dateString]?.append(forecast)
+            } else {
+                groupedForecasts[dateString] = [forecast]
+            }
+        }
+        
+        return groupedForecasts
+    }
+    
 }
 

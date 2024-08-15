@@ -29,8 +29,12 @@ struct WeatherListScreen: View {
                         WeatherCell(weather: weather)
                     }
                 }
+                .onDelete(perform: deleteItems)
             }
         .listStyle(PlainListStyle())
+        .onAppear {
+            store.loadSavedCities()
+        }
         
         .sheet(item: $activeSheet, content: { (item) in
             switch item {
@@ -50,8 +54,14 @@ struct WeatherListScreen: View {
             Image(systemName: "plus")
         }))
         .navigationTitle("Cities")
-        .accentColor(.purple)
         .embedInNavigationView()
+    }
+    private func deleteItems(at offsets: IndexSet) {
+        offsets.forEach { index in
+            let weatherToRemove = store.weatherList[index]
+            store.weatherList.remove(at: index)
+            store.removeWeather(weatherToRemove)
+        }
     }
 }
 
